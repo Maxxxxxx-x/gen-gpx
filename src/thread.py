@@ -38,7 +38,8 @@ class ThreadHandler:
                 if data is None:
                     logger.info("No new data obtained.")
                     continue
-                self.rawdata_queue.put(data)
+                for data_item in data:
+                    self.rawdata_queue.put(data_item)
             logger.info("Stopping data fetching thread...")
 
         def processor_wrapper():

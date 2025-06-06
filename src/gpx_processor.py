@@ -1,4 +1,4 @@
-from typing import Tuple, List, Dict, TypeDict
+from typing import Tuple, List, Dict, TypedDict
 
 from geopy.distance import geodesic
 from datetime import datetime
@@ -6,14 +6,14 @@ import gpxpy
 import math
 
 
-class TrackPoint(TypeDict):
+class TrackPoint(TypedDict):
     lat: float
     lon: float
     ele: float | None
     time: datetime
 
 
-class DeltaPoint(TypeDict):
+class DeltaPoint(TypedDict):
     d_lat: float
     d_lon: float
     d_ele: float

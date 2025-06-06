@@ -1,6 +1,6 @@
 from psycopg2.extensions import connection
 from typing import List, Tuple, Any
-from .config import query_limit
+import config  # 改為絕對匯入
 import psycopg2
 import os
 
@@ -31,7 +31,7 @@ def get_connection_str() -> str:
     if not (host and port and username and password and db_name):
         print("Missing ENV variable")
         return ""
-    return CONNECTION_STR.format(host, port, username, password, db_name)
+    return CONNECTION_STR % (host, port, username, password, db_name)
 
 
 def connect_database(conn_str: str) -> connection:
@@ -43,7 +43,7 @@ def get_records_from_database(
         offset: int
 ) -> List[Tuple[Any, ...]]:
     cursor = conn.cursor()
-    cursor.execute(SQL_QUERY, (query_limit, offset))
+    cursor.execute(SQL_QUERY, (config.query_limit, offset))  # 使用 config.query_limit
     result = cursor.fetchall()
     cursor.close()
     return result
