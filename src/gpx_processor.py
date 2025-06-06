@@ -48,7 +48,7 @@ def compute_deltas(points: List[TrackPoint]) -> List[DeltaPoint]:
                         (next_pt.lat, next_pt.lon)).meters
         spd = dist / d_t if d_t > 0 else 0
         d_ele = (next_pt.ele or 0) - (curr_pt.ele or 0)
-        slope_angle = math.degrees(math.atan2(d_ele, dist)) if dist > 0 else 0
+        slope_angle = math.atan2(d_ele, dist) if dist > 0 else 0
 
         deltas.append({
             "d_lat": next_pt.lat - curr_pt.lat,

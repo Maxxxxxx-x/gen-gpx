@@ -8,9 +8,9 @@ import os
 class LSTM(nn.Module):
     def __init__(
             self,
-            input_size: int = 5,
-            hidden_size: int = 128,
-            num_layers: int = 2
+            input_size: int = 6,
+            hidden_size: int = 64,
+            num_layers: int = 16
     ) -> None:
         super(LSTM, self).__init__()
         self.lstm = nn.LSTM(
