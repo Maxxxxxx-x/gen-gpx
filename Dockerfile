@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install cloudflare-warp -y
 RUN setsid warp-svc >/dev/null 2>&1 < /dev/null &
 
 COPY . .
+COPY .env .
 
 RUN pip install -r requirements.txt
 
