@@ -36,7 +36,6 @@ class ThreadHandler:
             while not self.stop_producer_event.is_set():
                 data = producer_func(*producer_args)
                 if data is None:
-                    logger.info("No new data obtained.")
                     continue
                 for data_item in data:
                     self.rawdata_queue.put(data_item)
@@ -45,9 +44,8 @@ class ThreadHandler:
         def processor_wrapper():
             logger.info("Starting data processing thread...")
             while not self.stop_processor_event.is_set():
-                feature = processor_func(*processor_args)
+                feature = processor_func(processor_args)
                 if feature is None:
-                    logger.info("No new features obtained.")
                     continue
                 self.feature_queue.put(feature)
             logger.info("Stopping data processing thread...")
@@ -57,7 +55,6 @@ class ThreadHandler:
             while not self.stop_consumer_event.is_set():
                 result = consumer_func(*consumer_args)
                 if result is None:
-                    logger.info("No new training result obtained.")
                     continue
                 logger.info(f"Training result: {result}")
             logger.info("Stopping training thread...")

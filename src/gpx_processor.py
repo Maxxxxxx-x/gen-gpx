@@ -24,7 +24,7 @@ class DeltaPoint(TypedDict):
 
 def parse_gpx(raw_gpx: str) -> List[TrackPoint]:
     gpx = gpxpy.parse(raw_gpx)
-
+    
     points = []
     for track in gpx.tracks:
         for segment in track.segments:
@@ -71,7 +71,7 @@ def split_sequences(
         seq_in = deltas[i:i + seq_len]
         target = deltas[i + seq_len]
         x.append([[delta["d_lat"], delta["d_lon"], delta["d_ele"],
-                 delta["d_t"], delta["slope"]] for delta in seq_in])
+                 delta["d_t"], delta["spd"], delta["slope"]] for delta in seq_in])
         y.append([target["d_lat"], target["d_lon"],
-                 target["d_ele"], target["d_t"], target["slope"]])
+                 target["d_ele"], target["d_t"], target["spd"], target["slope"]])
     return (x, y)

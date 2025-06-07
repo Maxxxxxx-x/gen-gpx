@@ -31,7 +31,7 @@ def get_records_from_database(
 ) -> List[Tuple[Any, ...]]:
     cursor = conn.cursor()
     SQL_QUERY = f"""
-    SELECT id, trails
+    SELECT id, rawdata
     FROM records
     WHERE trails IN (
         SELECT trails

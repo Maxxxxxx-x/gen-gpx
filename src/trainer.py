@@ -70,20 +70,18 @@ def train(
 
             current_loss += loss.item()
             batch_count += 1
-        epoch_loss = current_loss / \
-            batch_count if batch_count > 0 else float("inf")
+        epoch_loss = current_loss / batch_count if batch_count > 0 else float("inf")
         print(f"Epochs: {epoch+1}/{epochs} | Loss: {loss.item():.6f}")
 
         if epoch_loss < best_loss:
             best_loss = epoch_loss
             best_path = os.path.join(checkpoint_dir, "best.pt")
             torch.save(model.state_dict(), best_path)
-            print(f"Saved new model at epoch {
-                  epoch + 1}. Loss: {best_loss:.6f}")
+            print(f"Saved new model at epoch {epoch + 1}. Loss: {best_loss:.6f}")
 
         if (epoch + 1) % 5 == 0:
             checkpoint_path = os.path.join(
-                checkpoint_dir, f"checkpoint_epoch_{epoch}+1.pt")
+                checkpoint_dir, f"checkpoint_epoch_{epoch+1}.pt")
             torch.save(model.state_dict(), checkpoint_path)
             print(f"Saved checkpoint at epoch {epoch + 1}")
 

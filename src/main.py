@@ -26,13 +26,12 @@ def create_logger() -> logging.Logger:
     return logger
 
 
-def fetch_data_from_db(connection, offset_tracker):
+def fetch_data_from_db(connection, query_limit, offset_tracker):
     """Fetching thread function - 從資料庫獲取資料"""
     try:
         records = db.get_records_from_database(
-            connection, offset_tracker['offset'])
-        logging.debug(f"Fetched {len(records)} records from database at offset {
-                      offset_tracker['offset']}")
+            connection, query_limit, offset_tracker['offset'])
+        logging.debug(f"Fetched {len(records)} records from database at offset {offset_tracker['offset']}")
         if not records:
             return None
         offset_tracker['offset'] += len(records)
@@ -48,23 +47,22 @@ def process_raw_data(rawdata_queue):
         if rawdata_queue.empty():
             return None
 
-        records = rawdata_queue.get(timeout=1)
+        record = rawdata_queue.get(timeout=1)
         all_deltas = []
+        record_id, trail_data = record
+        try:
+            # 解析 GPX 資料
+            track_points = gpx_processor.parse_gpx(trail_data)
+            if len(track_points) < 2:
+                return None
 
-        for record_id, trail_data in records:
-            try:
-                # 解析 GPX 資料
-                track_points = gpx_processor.parse_gpx(trail_data)
-                if len(track_points) < 2:
-                    continue
+            # 計算增量
+            deltas = gpx_processor.compute_deltas(track_points)
+            all_deltas.extend(deltas)
 
-                # 計算增量
-                deltas = gpx_processor.compute_deltas(track_points)
-                all_deltas.extend(deltas)
-
-            except Exception as e:
-                logging.warning(f"Error processing record {record_id}: {e}")
-                continue
+        except Exception as e:
+            logging.warning(f"Error processing record {record_id}: {e}")
+            return None
 
         rawdata_queue.task_done()
         return all_deltas if all_deltas else None
@@ -96,7 +94,7 @@ def train_model(feature_queue, model_state, sequence_length, batch_size, checkpo
         _ = trainer.train(
             X, y,
             checkpoint_dir=checkpoint_dir,
-            epochs=5,
+            epochs=20,
             batch_size=batch_size,
             device=device
         )
@@ -136,6 +134,7 @@ def main() -> None:
 
     # 建立共享狀態
     offset_tracker = {'offset': 0}
+    query_limit = config.query_limit
     model_state = {'trained_models': 0}
 
     # 建立執行緒處理器
@@ -147,9 +146,9 @@ def main() -> None:
             producer_func=fetch_data_from_db,
             processor_func=process_raw_data,
             consumer_func=train_model,
-            producer_args=(connection, offset_tracker),
-            processor_args=(rawdata_queue,),
-            consumer_args=(feature_queue, model_state)
+            producer_args=(connection, query_limit, offset_tracker),
+            processor_args=(rawdata_queue),
+            consumer_args=(feature_queue, model_state, config.sequence_length, config.batch_size, config.checkpoint_dir)
         )
 
         logger.info("All threads started. Press Ctrl+C to stop...")
