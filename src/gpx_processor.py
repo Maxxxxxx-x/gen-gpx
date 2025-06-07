@@ -22,19 +22,50 @@ class DeltaPoint(TypedDict):
     slope: float
 
 
+R = 6371e3  # meters
+
+
+def distance2D(point1: gpxpy.gpx.GPXTrackPoint, point2: gpxpy.gpx.GPXTrackPoint):
+    lat1, lon1 = point1.latitude, point1.longitude
+    lat2, lon2 = point2.latitude, point2.longitude
+    return 2*R*math.asin(math.sqrt(math.sin((lat2 - lat1) * math.pi / 180 / 2) ** 2 + math.cos(lat1 * math.pi / 180) * math.cos(lat2 * math.pi / 180) * math.sin((lon2 - lon1) * math.pi / 180 / 2) ** 2))
+
+
+def distance3D(point1: gpxpy.gpx.GPXTrackPoint, point2: gpxpy.gpx.GPXTrackPoint):
+    dist = distance2D(point1, point2)
+    diff_elevation = point2.elevation - point1.elevation
+    return math.sqrt((dist ** 2) + (diff_elevation ** 2))
+
+
 def parse_gpx(raw_gpx: str) -> List[TrackPoint]:
     gpx = gpxpy.parse(raw_gpx)
-    
-    points = []
+    raw_points = []
+    distance = 0
+
     for track in gpx.tracks:
         for segment in track.segments:
             for pt in segment.points:
-                points.append({
-                    "lat": pt.latitude,
-                    "lon": pt.longitude,
-                    "ele": pt.elevation,
-                    "time": pt.time
-                })
+                if len(raw_points) < 1:
+                    raw_points.append(pt)
+                    continue
+                pt_dist = distance3D(raw_points[-1], pt)
+                if pt_dist > 100:
+                    continue
+                distance += pt_dist
+                raw_points.append(pt)
+
+    points = []
+
+    if distance < 400:
+        return points
+
+    for pt in raw_points:
+        points.append({
+            "lat": pt.latitude,
+            "lon": pt.longitude,
+            "ele": pt.elevation,
+            "time": pt.time
+        })
     return points
 
 
