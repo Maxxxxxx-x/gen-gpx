@@ -1,4 +1,4 @@
-from .gpx_processor import TrackPoint, DeltaPoint
+from gpx_processor import TrackPoint, DeltaPoint
 from datetime import timedelta
 from typing import List
 import gpxpy.gpx

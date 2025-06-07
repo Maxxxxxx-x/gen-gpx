@@ -1,4 +1,5 @@
 from typing import List
+
 from torch.utils.data import DataLoader, TensorDataset
 import torch.nn as nn
 import torch
@@ -79,10 +80,37 @@ def train(
             torch.save(model.state_dict(), best_path)
             print(f"Saved new model at epoch {epoch + 1}. Loss: {best_loss:.6f}")
 
-        if (epoch + 1) % 5 == 0:
+        if (epoch + 1) % 10 == 0:
             checkpoint_path = os.path.join(
                 checkpoint_dir, f"checkpoint_epoch_{epoch+1}.pt")
             torch.save(model.state_dict(), checkpoint_path)
             print(f"Saved checkpoint at epoch {epoch + 1}")
 
     return model
+
+
+def load_model(
+    checkpoint_path: str,
+    input_size: int = 6,
+    hidden_size: int = 64,
+    num_layers: int = 16,
+    device: torch.device = torch.device("cpu")
+) -> LSTM:
+    """載入已訓練的模型"""
+    model = LSTM(input_size, hidden_size, num_layers).to(device)
+    model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+    model.eval()  # 設定為評估模式
+    return model
+
+
+def predict(
+    model: LSTM,
+    input_sequence: List[List[float]],
+    device: torch.device = torch.device("cpu")
+) -> List[float]:
+    """使用模型進行預測"""
+    model.eval()
+    with torch.no_grad():
+        input_tensor = torch.tensor([input_sequence], dtype=torch.float32).to(device)
+        prediction = model(input_tensor)
+        return prediction.cpu().numpy().flatten().tolist()
