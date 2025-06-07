@@ -74,7 +74,7 @@ class ThreadHandler:
         self.training_thread.start()
         logger.info("All threads started successfully.")
         return self
-    
+
     def stop(self):
         logger.info("Stopping all threads...")
         self.stop_producer_event.set()

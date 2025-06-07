@@ -13,6 +13,7 @@ def get_device() -> torch.device:
     else:
         return torch.device("cpu")
 
+
 class LSTM(nn.Module):
     def __init__(
             self,

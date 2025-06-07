@@ -43,16 +43,16 @@ def compute_deltas(points: List[TrackPoint]) -> List[DeltaPoint]:
     for i in range(len(points) - 1):
         curr_pt = points[i]
         next_pt = points[i + 1]
-        d_t = (next_pt.time - curr_pt.time).total_seconds()
-        dist = geodesic((curr_pt.lat, curr_pt.lon),
-                        (next_pt.lat, next_pt.lon)).meters
+        d_t = (next_pt["time"] - curr_pt["time"]).total_seconds()
+        dist = geodesic((curr_pt["lat"], curr_pt["lon"]),
+                        (next_pt["lat"], next_pt["lon"])).meters
         spd = dist / d_t if d_t > 0 else 0
-        d_ele = (next_pt.ele or 0) - (curr_pt.ele or 0)
+        d_ele = (next_pt["ele"] or 0) - (curr_pt["ele"] or 0)
         slope_angle = math.atan2(d_ele, dist) if dist > 0 else 0
 
         deltas.append({
-            "d_lat": next_pt.lat - curr_pt.lat,
-            "d_lon": next_pt.lon - curr_pt.lon,
+            "d_lat": next_pt["lat"] - curr_pt["lat"],
+            "d_lon": next_pt["lon"] - curr_pt["lon"],
             "d_ele": d_ele,
             "d_t": d_t,
             "spd": spd,
@@ -70,8 +70,8 @@ def split_sequences(
     for i in range(len(deltas) - seq_len):
         seq_in = deltas[i:i + seq_len]
         target = deltas[i + seq_len]
-        x.append([[delta.d_lat, delta.d_lon, delta.d_ele,
-                 delta.d_t, delta.slope] for delta in seq_in])
-        y.append([target.d_lat, target.d_Lon,
-                 target.d_ele, target.d_t, target.slope])
+        x.append([[delta["d_lat"], delta["d_lon"], delta["d_ele"],
+                 delta["d_t"], delta["slope"]] for delta in seq_in])
+        y.append([target["d_lat"], target["d_lon"],
+                 target["d_ele"], target["d_t"], target["slope"]])
     return (x, y)

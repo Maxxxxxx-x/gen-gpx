@@ -14,16 +14,16 @@ def deltas_to_gpx(
     segment = gpxpy.gpx.GPXTrackSegment()
     track.segments.append(segment)
 
-    curr_lat = start_point.lat
-    curr_lon = start_point.lon
-    curr_ele = start_point.ele or 0
-    curr_time = start_point.time
+    curr_lat = start_point["lat"]
+    curr_lon = start_point["lon"]
+    curr_ele = start_point["ele"] or 0
+    curr_time = start_point["time"]
 
     for delta in deltas:
-        curr_lat += delta.d_lat
-        curr_lon += delta.d_lon
-        curr_ele += delta.d_ele
-        curr_time += timedelta(seconds=delta.d_t)
+        curr_lat += delta["d_lat"]
+        curr_lon += delta["d_lon"]
+        curr_ele += delta["d_ele"]
+        curr_time += timedelta(seconds=delta["d_t"])
         pt = gpxpy.gpx.GPXTrackPoint(
             curr_lat,
             curr_lon,
